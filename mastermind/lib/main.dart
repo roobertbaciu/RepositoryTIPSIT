@@ -1,8 +1,11 @@
-import 'dart:math';
+import 'dart:math'; // Usato per generare numeri casuali
 import 'package:flutter/material.dart';
 
+/// Punto di ingresso dell'applicazione
 void main() => runApp(const ColorSequenceApp());
 
+/// Widget principale dell'app
+/// Imposta tema, titolo e schermata iniziale
 class ColorSequenceApp extends StatelessWidget {
   const ColorSequenceApp({super.key});
 
@@ -20,6 +23,8 @@ class ColorSequenceApp extends StatelessWidget {
   }
 }
 
+/// Schermata principale del gioco
+/// Contiene tutta la logica e l'interfaccia
 class ColorSequenceScreen extends StatefulWidget {
   const ColorSequenceScreen({super.key});
 
@@ -27,9 +32,13 @@ class ColorSequenceScreen extends StatefulWidget {
   State<ColorSequenceScreen> createState() => _ColorSequenceScreenState();
 }
 
+/// Stato della schermata di gioco
 class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
+
+  /// Valore speciale che indica nessun colore selezionato
   static const int _greyIndex = -1;
 
+  /// Lista dei colori disponibili nel gioco
   final List<Color> _colors = [
     Colors.pinkAccent,
     Colors.teal,
@@ -38,6 +47,7 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
     Colors.deepPurpleAccent,
   ];
 
+  /// Etichette testuali dei colori (non usate nell'UI)
   final List<String> _colorLabels = [
     'Rosa',
     'Verde Acqua',
@@ -46,25 +56,37 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
     'Viola',
   ];
 
+  /// Sequenza corretta da indovinare
   late List<int> _targetSequence;
+
+  /// Sequenza scelta dall'utente
   List<int> _userSequence = List.filled(4, _greyIndex);
+
+  /// Indica se ogni posizione è stata verificata
   List<bool> _checked = List.filled(4, false);
 
+  /// Indica se il pulsante "Verifica" è attivo
   bool _canVerify = true;
+
+  /// Indica se il giocatore ha vinto
   bool _won = false;
 
   @override
   void initState() {
     super.initState();
-    _generateNewSequence();
+    _generateNewSequence(); // Genera la prima sequenza all'avvio
   }
 
-  /// Genera una nuova sequenza casuale da indovinare
+  /// Genera una nuova sequenza casuale di colori
+  /// Resetta anche lo stato del gioco
   void _generateNewSequence() {
     final rnd = Random();
 
     setState(() {
-      _targetSequence = List.generate(4, (_) => rnd.nextInt(_colors.length));
+      _targetSequence = List.generate(
+        4,
+        (_) => rnd.nextInt(_colors.length),
+      );
       _userSequence = List.filled(4, _greyIndex);
       _checked = List.filled(4, false);
       _canVerify = true;
@@ -72,7 +94,10 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
     });
   }
 
-  /// Cambia il colore selezionato dall’utente in un determinato punto
+  /// Cambia il colore selezionato dall’utente
+  /// Cicla tra i colori disponibili
+  ///
+  /// [index] indica la posizione da modificare
   void _changeUserColor(int index) {
     setState(() {
       if (_userSequence[index] == _greyIndex) {
@@ -82,13 +107,15 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
             (_userSequence[index] + 1) % _colors.length;
       }
 
+      // Reset dei controlli dopo ogni modifica
       _checked = List.filled(4, false);
       _canVerify = true;
       _won = false;
     });
   }
 
-  /// Verifica se la sequenza utente è corretta
+  /// Verifica se la sequenza inserita dall'utente è corretta
+  /// Mostra icone di conferma o errore
   void _verifySequence() {
     setState(() {
       _checked = List.filled(4, true);
@@ -108,6 +135,7 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
+        // Sfondo con gradiente
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [Colors.teal.shade200, Colors.deepPurple.shade200],
@@ -121,6 +149,7 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+
                 // Titolo principale
                 const Text(
                   '🌀 Color Sequence',
@@ -128,10 +157,12 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
                     fontSize: 34,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    letterSpacing: 1.2,
                   ),
                 ),
+
                 const SizedBox(height: 10),
+
+                // Sottotitolo
                 const Text(
                   'Indovina la sequenza corretta!',
                   style: TextStyle(
@@ -143,14 +174,18 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
 
                 const SizedBox(height: 80),
 
-                // Pulsanti dei colori
+                // Pulsanti circolari dei colori
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(4, (index) {
-                    final currentColor = _userSequence[index] == _greyIndex
-                        ? Colors.grey.shade400
-                        : _colors[_userSequence[index]];
 
+                    // Colore attuale del cerchio
+                    final currentColor =
+                        _userSequence[index] == _greyIndex
+                            ? Colors.grey.shade400
+                            : _colors[_userSequence[index]];
+
+                    // Icona di conferma o errore
                     final Widget icon = _checked[index]
                         ? Icon(
                             _userSequence[index] == _targetSequence[index]
@@ -207,61 +242,26 @@ class _ColorSequenceScreenState extends State<ColorSequenceScreen> {
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black45,
-                          blurRadius: 6,
-                          offset: Offset(2, 2),
-                        ),
-                      ],
                     ),
                   ),
                 ),
 
                 const Spacer(),
 
-                // Pulsanti di controllo (verifica / nuova sequenza)
+                // Pulsanti di controllo
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     ElevatedButton.icon(
                       onPressed: _canVerify ? _verifySequence : null,
-                      icon: const Icon(Icons.check, color: Colors.white),
-                      label: const Text(
-                        'Verifica',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.teal.shade600,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 25,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 6,
-                      ),
+                      icon: const Icon(Icons.check),
+                      label: const Text('Verifica'),
                     ),
                     const SizedBox(width: 20),
                     ElevatedButton.icon(
                       onPressed: _generateNewSequence,
-                      icon: const Icon(Icons.refresh, color: Colors.white),
-                      label: const Text(
-                        'Nuova',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.deepPurple.shade400,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 25,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 6,
-                      ),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Nuova'),
                     ),
                   ],
                 ),
