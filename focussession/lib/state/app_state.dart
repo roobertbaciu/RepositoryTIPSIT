@@ -18,7 +18,8 @@ enum FocusTimerState {
   finished, // Finito: countdown a 0 e sessione registrata come completed
 }
 
-/// Stato centrale dell’app (ChangeNotifier) per il timer + storico sessioni.
+/// permette di notificare automaticamente la UI quando cambia lo stato
+/// con notifyListeners()
 ///
 /// Responsabilità:
 /// - gestire timer (start/pause/resume/stop/reset)
